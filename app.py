@@ -1,6 +1,6 @@
 import os
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes
 from flask import Flask
 
 # Récupérer le token depuis les variables d'environnement
@@ -10,7 +10,7 @@ TOKEN = os.getenv('TELEGRAM_TOKEN', "8380142036:AAECByAZfHCR4tbnCsFMDIlpGWjvCUo2
 app = Flask(__name__)
 
 # Créer l'application Telegram
-telegram_app = ApplicationBuilder().token(TOKEN).build()
+telegram_app = Application.builder().token(TOKEN).build()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Salut ! Je suis le bot de Fredy, ravi de te rencontrer ! 😊")
