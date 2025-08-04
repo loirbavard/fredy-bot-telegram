@@ -11,43 +11,61 @@ TOKEN = os.getenv('TELEGRAM_TOKEN', "8380142036:AAECByAZfHCR4tbnCsFMDIlpGWjvCUo2
 # Créer l'application Flask pour Render
 app = Flask(__name__)
 
-# Variable globale pour l'application Telegram
-telegram_app = None
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(f"Commande /start reçue de {update.effective_user.id}")
     await update.message.reply_text("Salut ! Je suis le bot de Fredy, ravi de te rencontrer ! 😊")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(f"Commande /help reçue de {update.effective_user.id}")
     await update.message.reply_text("Voici les commandes disponibles:\n/start - Démarrer le bot\n/help - Afficher l'aide\n/cc - Dire cc lm")
 
 async def cc_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(f"Commande /cc reçue de {update.effective_user.id}")
     await update.message.reply_text("cc lm ! 👋")
 
 @app.route('/')
 def home():
     return "Bot Telegram Fredy - Fonctionne parfaitement sur Render ! 🚀"
 
+@app.route('/health')
+def health():
+    return "Bot en ligne ! ✅"
+
 def run_bot():
     """Fonction pour démarrer le bot"""
-    global telegram_app
-    print("Bot démarré sur Render...")
+    print("🚀 Démarrage du bot Telegram...")
     
-    # Créer l'application Telegram
-    telegram_app = Application.builder().token(TOKEN).build()
+    async def bot_main():
+        try:
+            # Créer l'application Telegram
+            application = Application.builder().token(TOKEN).build()
+            
+            # Ajouter les handlers
+            application.add_handler(CommandHandler("start", start))
+            application.add_handler(CommandHandler("help", help_command))
+            application.add_handler(CommandHandler("cc", cc_command))
+            
+            print("✅ Bot configuré avec succès")
+            print("🔄 Démarrage du polling...")
+            
+            # Démarrer le bot
+            await application.run_polling(allowed_updates=Update.ALL_TYPES)
+            
+        except Exception as e:
+            print(f"❌ Erreur lors du démarrage du bot: {e}")
     
-    # Ajouter les handlers
-    telegram_app.add_handler(CommandHandler("start", start))
-    telegram_app.add_handler(CommandHandler("help", help_command))
-    telegram_app.add_handler(CommandHandler("cc", cc_command))
-    
-    # Démarrer le bot
-    telegram_app.run_polling()
+    # Démarrer le bot avec asyncio
+    asyncio.run(bot_main())
 
 if __name__ == '__main__':
+    print("🎯 Démarrage de l'application...")
+    
     # Démarrer le bot dans un thread séparé
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.daemon = True
     bot_thread.start()
+    
+    print("🌐 Démarrage du serveur Flask...")
     
     # Démarrer Flask pour Render
     port = int(os.environ.get('PORT', 10000))
